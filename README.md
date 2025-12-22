@@ -18,14 +18,20 @@ git submodule add https://github.com/PIN-AI/pin-protocol-proto.git proto
 
 ```
 proto/
+├── common/             # Shared type definitions
+│   └── types.proto            # Common types used across layers
+│
 ├── rootlayer/          # RootLayer protocol definitions
 │   ├── intent.proto           # Intent lifecycle (4-state model)
 │   ├── assignment.proto       # Matcher-Agent assignments
-│   ├── matcher.proto          # Matcher registry & status APIs
-│   ├── matcher_service.proto  # gRPC entrypoints for matcher workflow
-│   └── service.proto          # Intent + assignment services
+│   ├── direct.proto           # Direct mode protocol
+│   ├── error_reason.proto     # Error reason codes
+│   ├── validation.proto       # Validation definitions
+│   ├── service.proto          # Intent + assignment services
+│   └── openapi.yaml           # OpenAPI specification
 │
 ├── subnet/             # Subnet protocol definitions
+│   ├── agent.proto            # Agent definitions
 │   ├── bid.proto              # Agent bid payloads + acks
 │   ├── matcher.proto          # Matcher snapshots + events
 │   ├── matcher_service.proto  # Matcher gRPC control-plane
@@ -33,6 +39,7 @@ proto/
 │   ├── validation.proto       # Validation policies
 │   ├── checkpoint.proto       # Checkpoint consensus
 │   ├── validator.proto        # Validator management
+│   ├── gossip.proto           # Validator gossip protocol
 │   ├── report.proto           # Legacy evidence payloads
 │   └── service.proto          # Subnet node service surface
 │
