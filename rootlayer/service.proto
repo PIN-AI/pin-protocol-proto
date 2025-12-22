@@ -1,0 +1,411 @@
+syntax = "proto3";
+package rootlayer.v1;
+
+option go_package = "github.com/pin-protocol/rootlayer/api/gen/go/rootlayer;rootlayerv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "rootlayer/intent.proto";
+import "rootlayer/assignment.proto";
+import "rootlayer/validation.proto";
+import "rootlayer/direct.proto";
+
+// Standard acknowledgment wrapper for write operations.
+message Ack {
+  // Whether the operation succeeded.
+  bool ok = 1;
+  // Optional human-readable message for additional context or errors.
+  string msg = 2;
+  // Transaction hash on chain if the operation triggers an on-chain tx.
+  string tx_hash = 3;
+}
+
+// IntentPoolService exposes REST endpoints for intent submission,
+// querying, and asynchronous callbacks from subnets.
+service IntentPoolService {
+  // Submit a batch of intents.
+  rpc SubmitIntentBatch(SubmitIntentBatchRequest) returns (SubmitIntentBatchResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/intents/submit/batch"
+      body: "*"
+    };
+  };
+
+  // Submit a new intent into the RootLayer mempool.
+  //
+  // Body is a SubmitIntentRequest. The signature proves ownership of
+  // the requester address and integrity of parameters.
+  //
+  // Example request body:
+  // {
+  //   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d",
+  //   "subnetId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+  //   "requester": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",
+  //   "settleChain": "base_sepolia",
+  //   "intentType": "test",
+  //   "params": {
+  //     "intentRaw": "cGluZ3Jhdw==",
+  //     "metadata": "LXRlc3QgbWV0YS0="
+  //   },
+  //   "tipsToken": "0x0000000000000000000000000000000000000000",
+  //   "tips": "0",
+  //   "deadline": "1822275330",
+  //   "signature": "cfe0c61b6c01fb6b907fd11e550797c761b2cecbc7a3d59e8775fe8640b88c5f1f297f7fdb321c3d1122",
+  //   "budgetToken": "0x0000000000000000000000000000000000000000",
+  //   "budget": "0"
+  // }
+  rpc SubmitIntent(SubmitIntentRequest) returns (SubmitIntentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/intents/submit"
+      body: "*"
+    };
+  };
+
+  // Query intents using multiple filters with pagination.
+  rpc GetIntents(GetIntentsRequest) returns (GetIntentsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/intents/query"
+    };
+  };
+
+  // Fetch a single intent by its ID.
+  rpc GetIntent(GetIntentRequest) returns (Intent) {
+    option (google.api.http) = {
+      get: "/api/v1/intents/query/{intent_id}"
+    };
+  };
+
+  // Post a single assignment from a subnet matcher.
+  //
+  // Example request body:
+  // {
+  //   "assignmentId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", // bytes32 hex
+  //   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d", // bytes32 hex
+  //   "agentId": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",                         // address (EIP-55 tolerated)
+  //   "bidId": "0x0000000000000000000000000000000000000000000000000000000000000000",   // bytes32 hex
+  //   "status": 1, // 1=ACTIVE, 2=FAILED
+  //   "matcherId": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266",                          // address
+  //   "signature": "0x..65-bytes-signature.."                                                // EIP-191 signature
+  // }
+  rpc PostAssignment(Assignment) returns (Ack) {
+    option (google.api.http) = {
+      post: "/api/v1/callbacks/assignment/submit"
+      body: "*"
+    };
+  };
+
+  // Post a batch of assignments from a subnet matcher.
+  rpc PostAssignmentBatch(AssignmentBatch) returns (Ack) {
+    option (google.api.http) = {
+      post: "/api/v1/callbacks/assignments/submit"
+      body: "*"
+    };
+  };
+
+  // Deprecated alias for backward compatibility.
+  rpc PostAssignments(AssignmentBatch) returns (Ack) {
+    option (google.api.http) = {
+      post: "/api/v1/callbacks/assignments/submit"
+      body: "*"
+    };
+  };
+
+  // Submit an aggregated ValidationBundle from subnet validators.
+  //
+  // Example request body:
+  // {
+  //   "subnetId": "0x0000000000000000000000000000000000000000000000000000000000000001",  // bytes32 hex
+  //   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d",  // bytes32 hex
+  //   "assignmentId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", // bytes32 hex
+  //   "agentId": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",                           // address
+  //   "rootHeight": "1",
+  //   "rootHash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", // bytes32 hex
+  //   "executedAt": "1",
+  //   "resultHash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", // bytes32 hex
+  //   "proofHash": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",  // bytes32 hex
+  //   "signatures": [
+  //     { "validator": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266", "signature": "0x..65-bytes.." }
+  //   ],
+  //   "signerBitmap": "0x01",
+  //   "totalWeight": "1",
+  //   "aggregatorId": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  //   "completedAt": "1822275330"
+  // }
+  rpc SubmitValidationBundle(ValidationBundle) returns (ValidationAck) {
+    option (google.api.http) = {
+      post: "/api/v1/callbacks/validation/submit"
+      body: "*"
+    };
+  };
+
+  // Submit a batch of validation bundles.
+  rpc SubmitValidationBundleBatch(ValidationBundleBatchRequest) returns (ValidationBundleBatchResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/callbacks/validation/submit/batch"
+      body: "*"
+    };
+  };
+}
+
+// gRPC streaming subscription service (not exposed via OpenAPI).
+service SubscriptionService {
+  // Subscribe to the real-time intent stream filtered by subnet and metadata.
+  rpc SubscribeIntents(SubscribeIntentsRequest) returns (stream IntentStreamEvent);
+
+  // Subscribe to status change notifications for one or more intents.
+  rpc SubscribeStatusUpdates(SubscribeStatusRequest) returns (stream StatusUpdateEvent);
+}
+
+// Liveness and version information.
+service HealthService {
+  rpc Check(google.protobuf.Empty) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+      get: "/health"
+    };
+  };
+}
+
+// ==================== Stream Messages ====================
+
+message SubscribeIntentsRequest {
+  // Target subnet to subscribe to (32-byte 0x-prefixed hex string).
+  string subnet_id = 1;
+  // Only stream intents whose deadline is greater than or equal to this unix timestamp.
+  int64 min_deadline = 2;
+  // Minimum tips filter as uint256 decimal string.
+  string min_tips = 3;
+  // Optional filter: include only these intent types.
+  repeated string intent_types = 4;
+  // Optional filter: include intents with these statuses only.
+  repeated IntentStatus status_filter = 5;
+  // If true, emit historical intents first before live updates.
+  bool include_historical = 6;
+}
+
+message IntentStreamEvent {
+  // Event kind: one of "new_intent", "status_changed", "chained".
+  string event_type = 1;
+  // The intent payload associated with the event.
+  Intent intent = 2;
+  // Server-side event timestamp (unix seconds).
+  int64 timestamp = 3;
+  // Event source identifier (implementation-defined).
+  string source = 4;
+  // Additional metadata for the event.
+  map<string, string> metadata = 5;
+}
+
+message SubscribeStatusRequest {
+  // Intent IDs to watch.
+  repeated string intent_ids = 1;
+  // Emit updates only when status becomes one of these values.
+  repeated IntentStatus statuses = 2;
+  // Consumer identifier for observability.
+  string subscriber_id = 3;
+}
+
+message StatusUpdateEvent {
+  // Intent ID whose status changed.
+  string intent_id = 1;
+  // Previous status value.
+  IntentStatus old_status = 2;
+  // New status value.
+  IntentStatus new_status = 3;
+  // Optional reason for the change.
+  string reason = 4;
+  // Update timestamp (unix seconds).
+  int64 timestamp = 5;
+  // Free-form metadata for the update.
+  map<string, string> metadata = 6;
+}
+
+message SubmitIntentResponse {
+  // Whether the intent was accepted into the mempool.
+  bool ok = 1;
+  // Context message describing acceptance or validation error.
+  string msg = 2;
+  // Canonical intent ID (hash) computed/accepted by the server.
+  string intent_id = 3;
+  // keccak256(params) used by on-chain verification.
+  bytes params_hash = 4;
+  // Expiration for on-chain submission (unix seconds).
+  int64 intent_expiration = 5;
+}
+
+// Batch intent submission request.
+message SubmitIntentBatchRequest {
+  // Intents to submit.
+  repeated SubmitIntentRequest items = 1;
+  // Optional client-provided batch identifier for idempotency.
+  string batch_id = 2;
+  // Allow partial success. If false, stop processing at first failure.
+  optional bool partial_ok = 3;
+  // If true, treat already existing intents as successful submissions.
+  optional bool treat_exists_as_ok = 4;
+}
+
+// Batch intent submission response.
+message SubmitIntentBatchResponse {
+  // Per-intent responses aligned with request order.
+  repeated SubmitIntentResponse results = 1;
+  // Number of successful submissions.
+  int32 success = 2;
+  // Number of failed submissions.
+  int32 failed = 3;
+  // Optional summary message.
+  string msg = 4;
+}
+
+// Batch validation bundle request.
+message ValidationBundleBatchRequest {
+  // Grouped validation bundles by subnet_id with shared signatures.
+  repeated ValidationBatchGroup groups = 1;
+  // Optional client-provided batch identifier for idempotency.
+  string batch_id = 2;
+  // Allow partial success.
+  optional bool partial_ok = 3;
+}
+
+// Batch validation bundle response.
+message ValidationBundleBatchResponse {
+  // Per-bundle responses aligned with request order.
+  repeated ValidationAck results = 1;
+  // Number of successful submissions.
+  int32 success = 2;
+  // Number of failed submissions.
+  int32 failed = 3;
+  // Optional summary message.
+  string msg = 4;
+}
+
+message GetIntentsRequest {
+  // Filter by exact intent ID.
+  string intent_id = 1;
+  // Filter by subnet (32-byte 0x-prefixed hex string).
+  string subnet_id = 2;
+  // Filter by status name (e.g. PENDING, COMPLETED).
+  string status = 3;
+  // Filter by requester address (EIP-55 checksum lowercase/uppercase tolerated).
+  string requester = 4;
+  // Return intents whose deadline >= this unix timestamp.
+  int64 min_deadline = 5;
+  // Return intents whose tips amount >= this uint256 decimal string.
+  string min_tips = 6;
+  // 1-based page index (defaults to 1).
+  int32 page = 7;
+  // Number of items per page (defaults to 20; max 100).
+  int32 page_size = 8;
+  // Sort field (e.g. "created_at", "deadline").
+  string order_by = 9;
+  // Sort direction: "asc" or "desc".
+  string order_dir = 10;
+}
+
+message GetIntentsResponse {
+  // Page of matching intents.
+  repeated Intent intents = 1;
+  // Total number of matching items.
+  int64 total = 2;
+  // Echo of requested page index.
+  int32 page = 3;
+  // Echo of requested page size.
+  int32 page_size = 4;
+  // Total number of pages given the current filters.
+  int64 total_pages = 5;
+}
+
+message GetIntentRequest {
+  // Intent ID to fetch.
+  string intent_id = 1;
+}
+
+message SubmitIntentRequest {
+  // Client-provided intent ID. A 32-byte 0x-prefixed hex value is recommended.
+  string intent_id = 1;
+  // Target subnet identifier (32-byte 0x-prefixed hex string).
+  string subnet_id = 2;
+  // Requester wallet address (EIP-55 checksum expected).
+  string requester = 3;
+  // Settlement chain name, e.g. "base_sepolia".
+  string settle_chain = 4;
+  // Application-specific intent type, e.g. "book_flight".
+  string intent_type = 5;
+  // Execution parameters. The on-chain params hash is keccak256(params).
+  IntentParams params = 6;
+  // ERC-20 token address for tips (0x0 for native).
+  string tips_token = 7;
+  // Tips amount as uint256 decimal string.
+  string tips = 8;
+  // Execution deadline (unix seconds).
+  int64 deadline = 9;
+  // User signature covering canonical intent content.
+  bytes signature = 10;
+  // ERC-20 token address for budget (0x0 for native).
+  string budget_token = 11;
+  // Maximum execution budget as uint256 decimal string (includes all costs).
+  string budget = 12;
+}
+
+// Health check response payload.
+message HealthCheckResponse {
+  // Service health: "SERVING" or "NOT_SERVING".
+  string status = 1;
+  // Logical service name.
+  string service = 2;
+  // Server timestamp (unix seconds).
+  int64 timestamp = 3;
+  // Service semantic version.
+  string version = 4;
+  // Additional details, if any.
+  map<string, string> details = 5;
+}
+
+// ====================================================================================
+// Relayer Service - Used by Agents (Direct Mode)
+// ====================================================================================
+
+// RelayerService handles Agent connections and Direct Intent dispatching
+service RelayerService {
+  // AgentConnect establishes a long-lived stream for Direct Intent delivery
+  // Agent receives DirectIntentPush messages through this stream
+  rpc AgentConnect(AgentConnectRequest) returns (stream DirectIntentPush);
+
+  // SubmitDirectResult allows Agent to submit execution results
+  rpc SubmitDirectResult(DirectResultRequest) returns (DirectResultResponse) {
+    option (google.api.http) = {
+      post: "/v1/direct/results"
+      body: "*"
+    };
+  }
+
+  // Heartbeat keeps the Agent connection alive
+  rpc Heartbeat(HeartbeatRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/direct/heartbeat"
+      body: "*"
+    };
+  }
+}
+
+// ====================================================================================
+// Direct Intent Service - Used by Users (Direct Mode)
+// ====================================================================================
+
+// DirectIntentService handles user Direct Intent submissions and queries
+service DirectIntentService {
+  // SubmitDirectIntent submits a Direct Intent and waits for Agent response
+  // Supports hybrid sync/async mode: returns result within timeout, or returns intent_id for async query
+  rpc SubmitDirectIntent(SubmitDirectIntentRequest) returns (SubmitDirectIntentResponse) {
+    option (google.api.http) = {
+      post: "/v1/direct/intents"
+      body: "*"
+    };
+  }
+
+  // GetDirectResult queries the execution result of a Direct Intent
+  rpc GetDirectResult(GetDirectResultRequest) returns (DirectResultDetail) {
+    option (google.api.http) = {
+      get: "/v1/direct/intents/{intent_id}/result"
+    };
+  }
+}

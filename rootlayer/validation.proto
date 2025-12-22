@@ -1,0 +1,104 @@
+syntax = "proto3";
+package rootlayer.v1;
+
+option go_package = "github.com/pin-protocol/rootlayer/api/gen/go/rootlayer;rootlayerv1";
+
+// Aggregated validation attestation from a subnet to RootLayer.
+message ValidationBundle {
+  // Source subnet (32-byte 0x-prefixed hex string).
+  string subnet_id = 1;
+  // Target intent ID.
+  string intent_id = 2;
+  // Assignment reference that produced this result.
+  string assignment_id = 3;
+  // Executing agent identifier.
+  string agent_id = 4;
+  // RootLayer reference height.
+  uint64 root_height = 5;
+  // RootLayer reference hash (0x-prefixed hex string).
+  string root_hash = 6;
+  // Execution timestamp (unix seconds).
+  int64 executed_at = 7;
+  // Hash of execution result payload (0x-prefixed hex if JSON uses string; base64 by default for bytes).
+  bytes result_hash = 8;
+  // Hash of execution proof (if any).
+  bytes proof_hash = 9;
+  // Individual validator signatures over msg_hash.
+  repeated ValidationSignature signatures = 10;
+  // Optional bitmap for validator IDs, packed by validator index.
+  bytes signer_bitmap = 11;
+  // Total validator weight included in the signatures.
+  uint64 total_weight = 12;
+  // Which validator acted as the aggregator for this bundle.
+  string aggregator_id = 13;
+  // Aggregation finalized timestamp (unix seconds).
+  int64 completed_at = 14;
+}
+
+// Single validator attestation inside a bundle.
+message ValidationSignature {
+  // Signer validator address (0x-prefixed hex string).
+  string validator = 1;
+  // Signature bytes. In JSON, the service may accept 0x-prefixed hex strings,
+  // but bytes are base64 by default per protobuf JSON mapping.
+  bytes signature = 2;
+}
+
+// Acknowledgment for ValidationBundle submission.
+message ValidationAck {
+  // Whether the bundle was accepted.
+  bool ok = 1;
+  // Context message.
+  string msg = 2;
+  // Optional reference for tracking.
+  string receipt_id = 3;
+}
+
+// Single validation item within a batch (without signatures).
+message ValidationItem {
+  // Target intent ID.
+  string intent_id = 1;
+  // Assignment reference that produced this result.
+  string assignment_id = 2;
+  // Executing agent identifier.
+  string agent_id = 3;
+  // Execution timestamp (unix seconds).
+  int64 executed_at = 4;
+  // Hash of execution result payload.
+  bytes result_hash = 5;
+  // Hash of execution proof (if any).
+  bytes proof_hash = 6;
+}
+
+// Batch validation group with shared signatures (same subnet).
+message ValidationBatchGroup {
+  // === Shared metadata across all items ===
+  // Source subnet (32-byte 0x-prefixed hex string).
+  string subnet_id = 1;
+  // RootLayer reference height.
+  uint64 root_height = 2;
+  // RootLayer reference hash (0x-prefixed hex string).
+  string root_hash = 3;
+  // Which validator acted as the aggregator for this bundle.
+  string aggregator_id = 4;
+  // Aggregation finalized timestamp (unix seconds).
+  int64 completed_at = 5;
+
+  // === Shared signatures (entire batch uses one set) ===
+  // Individual validator signatures over batch digest.
+  repeated ValidationSignature signatures = 6;
+  // Optional bitmap for validator IDs, packed by validator index.
+  bytes signer_bitmap = 7;
+  // Total validator weight included in the signatures.
+  uint64 total_weight = 8;
+
+  // === Independent validation items ===
+  // Array of validation items (different intents, shared signatures).
+  repeated ValidationItem items = 9;
+
+  // === Items hash (keccak256(abi.encode(items))) ===
+  // Pre-computed hash of items array used in signature generation.
+  // This field is REQUIRED and must match on-chain calculation.
+  // Added in SDK update to ensure signature verification consistency.
+  bytes items_hash = 10;
+}

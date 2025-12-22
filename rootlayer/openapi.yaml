@@ -1,0 +1,746 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /api/v1/callbacks/assignment/submit:
+        post:
+            tags:
+                - IntentPoolService
+            description: |-
+                Post a single assignment from a subnet matcher.
+
+                 Example request body:
+                 {
+                   "assignmentId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", // bytes32 hex
+                   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d", // bytes32 hex
+                   "agentId": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",                         // address (EIP-55 tolerated)
+                   "bidId": "0x0000000000000000000000000000000000000000000000000000000000000000",   // bytes32 hex
+                   "status": 1, // 1=ACTIVE, 2=FAILED
+                   "matcherId": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266",                          // address
+                   "signature": "0x..65-bytes-signature.."                                                // EIP-191 signature
+                 }
+            operationId: IntentPoolService_PostAssignment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.Assignment'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.Ack'
+    /api/v1/callbacks/assignments/submit:
+        post:
+            tags:
+                - IntentPoolService
+            description: Deprecated alias for backward compatibility.
+            operationId: IntentPoolService_PostAssignments
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.AssignmentBatch'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.Ack'
+    /api/v1/callbacks/validation/submit:
+        post:
+            tags:
+                - IntentPoolService
+            description: |-
+                Submit an aggregated ValidationBundle from subnet validators.
+
+                 Example request body:
+                 {
+                   "subnetId": "0x0000000000000000000000000000000000000000000000000000000000000001",  // bytes32 hex
+                   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d",  // bytes32 hex
+                   "assignmentId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", // bytes32 hex
+                   "agentId": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",                           // address
+                   "rootHeight": "1",
+                   "rootHash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", // bytes32 hex
+                   "executedAt": "1",
+                   "resultHash": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", // bytes32 hex
+                   "proofHash": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",  // bytes32 hex
+                   "signatures": [
+                     { "validator": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266", "signature": "0x..65-bytes.." }
+                   ],
+                   "signerBitmap": "0x01",
+                   "totalWeight": "1",
+                   "aggregatorId": "0xF39fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                   "completedAt": "1822275330"
+                 }
+            operationId: IntentPoolService_SubmitValidationBundle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.ValidationBundle'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.ValidationAck'
+    /api/v1/callbacks/validation/submit/batch:
+        post:
+            tags:
+                - IntentPoolService
+            description: Submit a batch of validation bundles.
+            operationId: IntentPoolService_SubmitValidationBundleBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.ValidationBundleBatchRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.ValidationBundleBatchResponse'
+    /api/v1/intents/query:
+        get:
+            tags:
+                - IntentPoolService
+            description: Query intents using multiple filters with pagination.
+            operationId: IntentPoolService_GetIntents
+            parameters:
+                - name: intentId
+                  in: query
+                  description: Filter by exact intent ID.
+                  schema:
+                    type: string
+                - name: subnetId
+                  in: query
+                  description: Filter by subnet (32-byte 0x-prefixed hex string).
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  description: Filter by status name (e.g. PENDING, COMPLETED).
+                  schema:
+                    type: string
+                - name: requester
+                  in: query
+                  description: Filter by requester address (EIP-55 checksum lowercase/uppercase tolerated).
+                  schema:
+                    type: string
+                - name: minDeadline
+                  in: query
+                  description: Return intents whose deadline >= this unix timestamp.
+                  schema:
+                    type: string
+                - name: minTips
+                  in: query
+                  description: Return intents whose tips amount >= this uint256 decimal string.
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  description: 1-based page index (defaults to 1).
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  description: Number of items per page (defaults to 20; max 100).
+                  schema:
+                    type: integer
+                    format: int32
+                - name: orderBy
+                  in: query
+                  description: Sort field (e.g. "created_at", "deadline").
+                  schema:
+                    type: string
+                - name: orderDir
+                  in: query
+                  description: 'Sort direction: "asc" or "desc".'
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.GetIntentsResponse'
+    /api/v1/intents/query/{intentId}:
+        get:
+            tags:
+                - IntentPoolService
+            description: Fetch a single intent by its ID.
+            operationId: IntentPoolService_GetIntent
+            parameters:
+                - name: intentId
+                  in: path
+                  description: Intent ID to fetch.
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.Intent'
+    /api/v1/intents/submit:
+        post:
+            tags:
+                - IntentPoolService
+            description: |-
+                Submit a new intent into the RootLayer mempool.
+
+                 Body is a SubmitIntentRequest. The signature proves ownership of
+                 the requester address and integrity of parameters.
+
+                 Example request body:
+                 {
+                   "intentId": "0xb7c98798a6ec454427a60cff94b54276fe82396f714c02499a40c8f3f6325f8d",
+                   "subnetId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                   "requester": "0x9290085Cd66bD1A3C7D277EF7DBcbD2e98457b6f",
+                   "settleChain": "base_sepolia",
+                   "intentType": "test",
+                   "params": {
+                     "intentRaw": "cGluZ3Jhdw==",
+                     "metadata": "LXRlc3QgbWV0YS0="
+                   },
+                   "tipsToken": "0x0000000000000000000000000000000000000000",
+                   "tips": "0",
+                   "deadline": "1822275330",
+                   "signature": "cfe0c61b6c01fb6b907fd11e550797c761b2cecbc7a3d59e8775fe8640b88c5f1f297f7fdb321c3d1122",
+                   "budgetToken": "0x0000000000000000000000000000000000000000",
+                   "budget": "0"
+                 }
+            operationId: IntentPoolService_SubmitIntent
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.SubmitIntentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.SubmitIntentResponse'
+    /api/v1/intents/submit/batch:
+        post:
+            tags:
+                - IntentPoolService
+            description: Submit a batch of intents.
+            operationId: IntentPoolService_SubmitIntentBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/rootlayer.v1.SubmitIntentBatchRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.SubmitIntentBatchResponse'
+    /health:
+        get:
+            tags:
+                - HealthService
+            operationId: HealthService_Check
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/rootlayer.v1.HealthCheckResponse'
+components:
+    schemas:
+        rootlayer.v1.Ack:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+                    description: Whether the operation succeeded.
+                msg:
+                    type: string
+                    description: Optional human-readable message for additional context or errors.
+                txHash:
+                    type: string
+                    description: Transaction hash on chain if the operation triggers an on-chain tx.
+            description: Standard acknowledgment wrapper for write operations.
+        rootlayer.v1.Assignment:
+            type: object
+            properties:
+                assignmentId:
+                    type: string
+                    description: Assignment ID (UUID recommended).
+                intentId:
+                    type: string
+                    description: The associated intent ID.
+                agentId:
+                    type: string
+                    description: Selected agent identifier.
+                bidId:
+                    type: string
+                    description: The bid ID associated with this assignment.
+                status:
+                    type: integer
+                    description: Current assignment status.
+                    format: enum
+                matcherId:
+                    type: string
+                    description: Matcher ID (required for traceability and auditing).
+                signature:
+                    type: string
+                    description: Matcher signature authorizing the assignment.
+                    format: bytes
+            description: Assignment selected by a subnet matcher for a given intent.
+        rootlayer.v1.AssignmentBatch:
+            type: object
+            properties:
+                assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.Assignment'
+                    description: Items in the batch.
+                batchId:
+                    type: string
+                    description: Client-side batch ID for idempotency.
+                createdAt:
+                    type: string
+                    description: Creation time for the batch (unix seconds).
+            description: Batch container for multiple assignments.
+        rootlayer.v1.GetIntentsResponse:
+            type: object
+            properties:
+                intents:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.Intent'
+                    description: Page of matching intents.
+                total:
+                    type: string
+                    description: Total number of matching items.
+                page:
+                    type: integer
+                    description: Echo of requested page index.
+                    format: int32
+                pageSize:
+                    type: integer
+                    description: Echo of requested page size.
+                    format: int32
+                totalPages:
+                    type: string
+                    description: Total number of pages given the current filters.
+        rootlayer.v1.HealthCheckResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: 'Service health: "SERVING" or "NOT_SERVING".'
+                service:
+                    type: string
+                    description: Logical service name.
+                timestamp:
+                    type: string
+                    description: Server timestamp (unix seconds).
+                version:
+                    type: string
+                    description: Service semantic version.
+                details:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Additional details, if any.
+            description: Health check response payload.
+        rootlayer.v1.Intent:
+            type: object
+            properties:
+                intentId:
+                    type: string
+                    description: Canonical intent ID (32-byte 0x-prefixed hex string recommended).
+                subnetId:
+                    type: string
+                    description: Target subnet identifier (32-byte 0x-prefixed hex string).
+                requester:
+                    type: string
+                    description: Requester wallet address (EIP-55 checksum expected).
+                settleChain:
+                    type: string
+                    description: Settlement chain name, e.g. "base_sepolia".
+                intentType:
+                    type: string
+                    description: Application-specific type, e.g. "book_flight".
+                params:
+                    allOf:
+                        - $ref: '#/components/schemas/rootlayer.v1.IntentParams'
+                    description: Execution parameters.
+                paramsHash:
+                    type: string
+                    description: keccak256(params) used by on-chain verification.
+                    format: bytes
+                tipsToken:
+                    type: string
+                    description: ERC-20 token address for tips (0x0 for native).
+                tips:
+                    type: string
+                    description: Tips amount as uint256 decimal string.
+                budgetToken:
+                    type: string
+                    description: ERC-20 token address for budget (0x0 for native).
+                budget:
+                    type: string
+                    description: Maximum execution budget as uint256 decimal string.
+                deadline:
+                    type: string
+                    description: Execution deadline (unix seconds).
+                intentExpiration:
+                    type: string
+                    description: Expiration for on-chain submission (unix seconds).
+                status:
+                    type: integer
+                    description: Current status.
+                    format: enum
+                createdAt:
+                    type: string
+                    description: Creation time (unix seconds).
+                signature:
+                    type: string
+                    description: User signature over canonical intent content.
+                    format: bytes
+                pendingConfirmed:
+                    type: boolean
+                    description: RootLayer has acknowledged PENDING status (ready for subnet bidding).
+                processingConfirmed:
+                    type: boolean
+                    description: RootLayer has acknowledged PROCESSING status (agent executing).
+                validationConfirmed:
+                    type: boolean
+                    description: RootLayer has acknowledged final status (COMPLETED/EXPIRED/FAILED).
+            description: Canonical intent entity stored by RootLayer.
+        rootlayer.v1.IntentParams:
+            type: object
+            properties:
+                intentRaw:
+                    type: string
+                    description: |-
+                        Raw intent payload as bytes. In JSON it is base64-encoded.
+                         Some clients may submit hex strings; servers should normalize as needed.
+                    format: bytes
+                metadata:
+                    type: string
+                    description: Optional metadata bytes (base64 in JSON).
+                    format: bytes
+            description: Opaque parameters supplied by the client for execution.
+        rootlayer.v1.SubmitIntentBatchRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.SubmitIntentRequest'
+                    description: Intents to submit.
+                batchId:
+                    type: string
+                    description: Optional client-provided batch identifier for idempotency.
+                partialOk:
+                    type: boolean
+                    description: Allow partial success. If false, stop processing at first failure.
+                treatExistsAsOk:
+                    type: boolean
+                    description: If true, treat already existing intents as successful submissions.
+            description: Batch intent submission request.
+        rootlayer.v1.SubmitIntentBatchResponse:
+            type: object
+            properties:
+                results:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.SubmitIntentResponse'
+                    description: Per-intent responses aligned with request order.
+                success:
+                    type: integer
+                    description: Number of successful submissions.
+                    format: int32
+                failed:
+                    type: integer
+                    description: Number of failed submissions.
+                    format: int32
+                msg:
+                    type: string
+                    description: Optional summary message.
+            description: Batch intent submission response.
+        rootlayer.v1.SubmitIntentRequest:
+            type: object
+            properties:
+                intentId:
+                    type: string
+                    description: Client-provided intent ID. A 32-byte 0x-prefixed hex value is recommended.
+                subnetId:
+                    type: string
+                    description: Target subnet identifier (32-byte 0x-prefixed hex string).
+                requester:
+                    type: string
+                    description: Requester wallet address (EIP-55 checksum expected).
+                settleChain:
+                    type: string
+                    description: Settlement chain name, e.g. "base_sepolia".
+                intentType:
+                    type: string
+                    description: Application-specific intent type, e.g. "book_flight".
+                params:
+                    allOf:
+                        - $ref: '#/components/schemas/rootlayer.v1.IntentParams'
+                    description: Execution parameters. The on-chain params hash is keccak256(params).
+                tipsToken:
+                    type: string
+                    description: ERC-20 token address for tips (0x0 for native).
+                tips:
+                    type: string
+                    description: Tips amount as uint256 decimal string.
+                deadline:
+                    type: string
+                    description: Execution deadline (unix seconds).
+                signature:
+                    type: string
+                    description: User signature covering canonical intent content.
+                    format: bytes
+                budgetToken:
+                    type: string
+                    description: ERC-20 token address for budget (0x0 for native).
+                budget:
+                    type: string
+                    description: Maximum execution budget as uint256 decimal string (includes all costs).
+        rootlayer.v1.SubmitIntentResponse:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+                    description: Whether the intent was accepted into the mempool.
+                msg:
+                    type: string
+                    description: Context message describing acceptance or validation error.
+                intentId:
+                    type: string
+                    description: Canonical intent ID (hash) computed/accepted by the server.
+                paramsHash:
+                    type: string
+                    description: keccak256(params) used by on-chain verification.
+                    format: bytes
+                intentExpiration:
+                    type: string
+                    description: Expiration for on-chain submission (unix seconds).
+        rootlayer.v1.ValidationAck:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+                    description: Whether the bundle was accepted.
+                msg:
+                    type: string
+                    description: Context message.
+                receiptId:
+                    type: string
+                    description: Optional reference for tracking.
+            description: Acknowledgment for ValidationBundle submission.
+        rootlayer.v1.ValidationBatchGroup:
+            type: object
+            properties:
+                subnetId:
+                    type: string
+                    description: |-
+                        === Shared metadata across all items ===
+                         Source subnet (32-byte 0x-prefixed hex string).
+                rootHeight:
+                    type: string
+                    description: RootLayer reference height.
+                rootHash:
+                    type: string
+                    description: RootLayer reference hash (0x-prefixed hex string).
+                aggregatorId:
+                    type: string
+                    description: Which validator acted as the aggregator for this bundle.
+                completedAt:
+                    type: string
+                    description: Aggregation finalized timestamp (unix seconds).
+                signatures:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.ValidationSignature'
+                    description: |-
+                        === Shared signatures (entire batch uses one set) ===
+                         Individual validator signatures over batch digest.
+                signerBitmap:
+                    type: string
+                    description: Optional bitmap for validator IDs, packed by validator index.
+                    format: bytes
+                totalWeight:
+                    type: string
+                    description: Total validator weight included in the signatures.
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.ValidationItem'
+                    description: |-
+                        === Independent validation items ===
+                         Array of validation items (different intents, shared signatures).
+                itemsHash:
+                    type: string
+                    description: |-
+                        === Items hash (keccak256(abi.encode(items))) ===
+                         Pre-computed hash of items array used in signature generation.
+                         This field is REQUIRED and must match on-chain calculation.
+                         Added in SDK update to ensure signature verification consistency.
+                    format: bytes
+            description: Batch validation group with shared signatures (same subnet).
+        rootlayer.v1.ValidationBundle:
+            type: object
+            properties:
+                subnetId:
+                    type: string
+                    description: Source subnet (32-byte 0x-prefixed hex string).
+                intentId:
+                    type: string
+                    description: Target intent ID.
+                assignmentId:
+                    type: string
+                    description: Assignment reference that produced this result.
+                agentId:
+                    type: string
+                    description: Executing agent identifier.
+                rootHeight:
+                    type: string
+                    description: RootLayer reference height.
+                rootHash:
+                    type: string
+                    description: RootLayer reference hash (0x-prefixed hex string).
+                executedAt:
+                    type: string
+                    description: Execution timestamp (unix seconds).
+                resultHash:
+                    type: string
+                    description: Hash of execution result payload (0x-prefixed hex if JSON uses string; base64 by default for bytes).
+                    format: bytes
+                proofHash:
+                    type: string
+                    description: Hash of execution proof (if any).
+                    format: bytes
+                signatures:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.ValidationSignature'
+                    description: Individual validator signatures over msg_hash.
+                signerBitmap:
+                    type: string
+                    description: Optional bitmap for validator IDs, packed by validator index.
+                    format: bytes
+                totalWeight:
+                    type: string
+                    description: Total validator weight included in the signatures.
+                aggregatorId:
+                    type: string
+                    description: Which validator acted as the aggregator for this bundle.
+                completedAt:
+                    type: string
+                    description: Aggregation finalized timestamp (unix seconds).
+            description: Aggregated validation attestation from a subnet to RootLayer.
+        rootlayer.v1.ValidationBundleBatchRequest:
+            type: object
+            properties:
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.ValidationBatchGroup'
+                    description: Grouped validation bundles by subnet_id with shared signatures.
+                batchId:
+                    type: string
+                    description: Optional client-provided batch identifier for idempotency.
+                partialOk:
+                    type: boolean
+                    description: Allow partial success.
+            description: Batch validation bundle request.
+        rootlayer.v1.ValidationBundleBatchResponse:
+            type: object
+            properties:
+                results:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/rootlayer.v1.ValidationAck'
+                    description: Per-bundle responses aligned with request order.
+                success:
+                    type: integer
+                    description: Number of successful submissions.
+                    format: int32
+                failed:
+                    type: integer
+                    description: Number of failed submissions.
+                    format: int32
+                msg:
+                    type: string
+                    description: Optional summary message.
+            description: Batch validation bundle response.
+        rootlayer.v1.ValidationItem:
+            type: object
+            properties:
+                intentId:
+                    type: string
+                    description: Target intent ID.
+                assignmentId:
+                    type: string
+                    description: Assignment reference that produced this result.
+                agentId:
+                    type: string
+                    description: Executing agent identifier.
+                executedAt:
+                    type: string
+                    description: Execution timestamp (unix seconds).
+                resultHash:
+                    type: string
+                    description: Hash of execution result payload.
+                    format: bytes
+                proofHash:
+                    type: string
+                    description: Hash of execution proof (if any).
+                    format: bytes
+            description: Single validation item within a batch (without signatures).
+        rootlayer.v1.ValidationSignature:
+            type: object
+            properties:
+                validator:
+                    type: string
+                    description: Signer validator address (0x-prefixed hex string).
+                signature:
+                    type: string
+                    description: |-
+                        Signature bytes. In JSON, the service may accept 0x-prefixed hex strings,
+                         but bytes are base64 by default per protobuf JSON mapping.
+                    format: bytes
+            description: Single validator attestation inside a bundle.
+tags:
+    - name: HealthService
+      description: Liveness and version information.
+    - name: IntentPoolService
+      description: |-
+        IntentPoolService exposes REST endpoints for intent submission,
+         querying, and asynchronous callbacks from subnets.

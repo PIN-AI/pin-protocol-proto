@@ -1,0 +1,73 @@
+syntax = "proto3";
+package rootlayer.v1;
+
+option go_package = "github.com/pin-protocol/rootlayer/api/gen/go/rootlayer;rootlayerv1";
+
+// Lifecycle states for an intent.
+enum IntentStatus {
+  // Not specified or invalid.
+  INTENT_STATUS_UNSPECIFIED = 0;
+  // Accepted and awaiting processing.
+  INTENT_STATUS_PENDING = 1;
+  // The intent has been recorded on-chain.
+  INTENT_STATUS_CHAINED = 2;
+  // Bidding process finished (matcher-selected agent).
+  INTENT_STATUS_PROCESSING = 3;
+  // Execution finished successfully.
+  INTENT_STATUS_COMPLETED = 4;
+  // No longer valid due to time or policy.
+  INTENT_STATUS_EXPIRED = 5;
+  // Irrecoverable failure.
+  INTENT_STATUS_FAILED = 6;
+}
+
+// Canonical intent entity stored by RootLayer.
+message Intent {
+  // Canonical intent ID (32-byte 0x-prefixed hex string recommended).
+  string intent_id = 1;
+  // Target subnet identifier (32-byte 0x-prefixed hex string).
+  string subnet_id = 2;
+  // Requester wallet address (EIP-55 checksum expected).
+  string requester = 3;
+  // Settlement chain name, e.g. "base_sepolia".
+  string settle_chain = 4;
+  // Application-specific type, e.g. "book_flight".
+  string intent_type = 5;
+  // Execution parameters.
+  IntentParams params = 6;
+  // keccak256(params) used by on-chain verification.
+  bytes params_hash = 7;
+  // ERC-20 token address for tips (0x0 for native).
+  string tips_token = 8;
+  // Tips amount as uint256 decimal string.
+  string tips = 9;
+  // ERC-20 token address for budget (0x0 for native).
+  string budget_token = 10;
+  // Maximum execution budget as uint256 decimal string.
+  string budget = 11;
+  // Execution deadline (unix seconds).
+  int64 deadline = 12;
+  // Expiration for on-chain submission (unix seconds).
+  int64 intent_expiration = 13;
+  // Current status.
+  IntentStatus status = 14;
+  // Creation time (unix seconds).
+  int64 created_at = 15;
+  // User signature over canonical intent content.
+  bytes signature = 16;
+  // RootLayer has acknowledged PENDING status (ready for subnet bidding).
+  bool pending_confirmed = 17;
+  // RootLayer has acknowledged PROCESSING status (agent executing).
+  bool processing_confirmed = 18;
+  // RootLayer has acknowledged final status (COMPLETED/EXPIRED/FAILED).
+  bool validation_confirmed = 19;
+}
+
+// Opaque parameters supplied by the client for execution.
+message IntentParams {
+  // Raw intent payload as bytes. In JSON it is base64-encoded.
+  // Some clients may submit hex strings; servers should normalize as needed.
+  bytes intent_raw = 1;
+  // Optional metadata bytes (base64 in JSON).
+  bytes metadata = 2;
+}

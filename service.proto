@@ -1,0 +1,11 @@
+// Pin Protocol - Main Service Index
+//
+// This file serves as an index to the separated protocol definitions:
+// - RootLayer services: ./rootlayer/service.proto
+// - Subnet services: ./subnet/service.proto
+//
+// The separation maintains clear boundaries between:
+// - RootLayer: Intent lifecycle, bidding, and assignment management
+// - Subnet: Execution verification, validation, and checkpoint consensus
+//
+// Please refer to the respective service files for detailed definitions.

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package subnet.v1;
+
+option go_package = "subnet/proto/subnet;pb";
+
+// GossipMessage is the top-level message for gossip protocol
+message GossipMessage {
+  oneof payload {
+    CheckpointSignature signature = 1;
+    ValidationBundleSignature validation_bundle_signature = 2;
+  }
+}
+
+// CheckpointSignature contains a validator's signature on a checkpoint
+message CheckpointSignature {
+  // Epoch of the checkpoint being signed
+  uint64 epoch = 1;
+
+  // Validator ID who signed this checkpoint
+  string validator_id = 2;
+
+  // DER-encoded ECDSA signature
+  bytes signature_der = 3;
+
+  // Unix timestamp when signature was created
+  int64 timestamp = 4;
+
+  // Hash of the checkpoint header to prevent signing wrong checkpoint
+  bytes checkpoint_hash = 5;
+}
+
+// ValidationBundleSignature contains a validator's signature on a ValidationBundle
+message ValidationBundleSignature {
+  // Intent ID being validated
+  string intent_id = 1;
+
+  // Assignment ID
+  string assignment_id = 2;
+
+  // Agent ID who executed the task
+  string agent_id = 8;
+
+  // Epoch of the checkpoint
+  uint64 epoch = 3;
+
+  // Validator address (0x-prefixed hex string)
+  string validator_address = 4;
+
+  // EIP-191 signature bytes
+  bytes signature = 5;
+
+  // Unix timestamp when signature was created
+  int64 timestamp = 6;
+
+  // Hash of the ValidationBundle digest to prevent signing wrong data
+  bytes bundle_digest_hash = 7;
+}

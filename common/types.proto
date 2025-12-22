@@ -1,0 +1,153 @@
+syntax = "proto3";
+package common.v1;
+
+option go_package = "common/proto;commonpb";
+
+// Common acknowledgment message used across services
+message Ack {
+  bool ok = 1;
+  string msg = 2;
+  string tx_hash = 3;           // optional transaction hash
+  int64 timestamp = 4;          // operation timestamp
+}
+
+// 分页请求 - 与API规范保持一致
+message PageRequest {
+  int32 page = 1;                // 页码
+  int32 page_size = 2;           // 页大小
+  string order_by = 3;           // 排序字段
+  string order_dir = 4;          // 排序方向
+}
+
+// 分页响应
+message PageResponse {
+  int64 total = 1;               // 总数
+  int32 page = 2;                // 当前页
+  int32 page_size = 3;           // 页大小
+  int64 total_pages = 4;         // 总页数
+}
+
+// Common error types
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+  map<string, string> details = 3;
+}
+
+// 统一错误码 - 与API规范保持一致
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  SUCCESS = 1;
+  INVALID_REQUEST = 2;
+  UNAUTHORIZED = 3;
+  FORBIDDEN = 4;
+  NOT_FOUND = 5;
+  CONFLICT = 6;
+  INTERNAL_ERROR = 7;
+  SERVICE_UNAVAILABLE = 8;
+  RATE_LIMITED = 9;
+  
+  // Intent相关错误 (2000-2099)
+  INTENT_EXISTS = 2001;
+  INTENT_NOT_FOUND = 2002;
+  INTENT_EXPIRED = 2003;
+  INVALID_INTENT_TYPE = 2004;
+  INVALID_BUDGET = 2005;
+  INVALID_DEADLINE = 2006;
+  INVALID_SIGNATURE = 2007;
+  SUBNET_NOT_FOUND = 2008;
+  SUBNET_INACTIVE = 2009;
+  
+  // Bid相关错误 (2100-2199)
+  BID_EXISTS = 2101;
+  BID_NOT_FOUND = 2102;
+  BIDDING_CLOSED = 2103;
+  PRICE_TOO_HIGH = 2104;
+  PRICE_TOO_LOW = 2105;
+  INVALID_QOS_PARAMS = 2106;
+  AGENT_NOT_QUALIFIED = 2107;
+  
+  // WebSocket相关错误 (3000-3099)
+  WS_AUTH_FAILED = 3001;
+  WS_CONNECTION_LIMIT = 3002;
+  WS_INVALID_MESSAGE = 3003;
+  WS_CLIENT_NOT_FOUND = 3004;
+}
+
+// Cryptographic signatures
+message Signature {
+  string algo = 1;              // "ECDSA-secp256k1", "BLS12-381"
+  bytes data = 2;               // signature bytes
+  bytes pubkey = 3;             // public key
+  string signer_id = 4;         // signer identifier
+}
+
+// Multi-signature
+message MultiSig {
+  repeated Signature signatures = 1;
+  bytes bitmap = 2;             // signers bitmap for efficiency
+  uint32 threshold = 3;         // required signatures
+}
+
+// Merkle proof
+message MerkleProof {
+  bytes leaf = 1;               // leaf data
+  uint32 leaf_index = 2;        // position in tree
+  repeated bytes siblings = 3;   // sibling hashes
+  bytes root = 4;               // merkle root
+}
+
+// Time range
+message TimeRange {
+  int64 start = 1;              // unix timestamp
+  int64 end = 2;                // unix timestamp
+}
+
+// Resource limits
+message ResourceLimits {
+  uint64 max_cpu_ms = 1;
+  uint64 max_memory_mb = 2;
+  uint64 max_storage_mb = 3;
+  uint64 max_network_bytes = 4;
+  uint32 max_duration_sec = 5;
+}
+
+// Key-value metadata
+message Metadata {
+  map<string, string> attributes = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+}
+
+// Domain-separated hash for different contexts
+message DomainHash {
+  string domain = 1;            // e.g., "intent:v1", "bid:v1"
+  uint32 version = 2;
+  bytes data = 3;
+  bytes hash = 4;               // computed hash
+}
+
+// Common priority levels
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  PRIORITY_LOW = 1;
+  PRIORITY_NORMAL = 2;
+  PRIORITY_HIGH = 3;
+  PRIORITY_URGENT = 4;
+}
+
+// Health status
+message HealthStatus {
+  ServiceStatus status = 1;
+  string message = 2;
+  map<string, string> details = 3;
+  int64 last_check = 4;
+}
+
+enum ServiceStatus {
+  SERVICE_STATUS_UNSPECIFIED = 0;
+  SERVICE_HEALTHY = 1;
+  SERVICE_DEGRADED = 2;
+  SERVICE_UNHEALTHY = 3;
+  SERVICE_MAINTENANCE = 4;
+}
