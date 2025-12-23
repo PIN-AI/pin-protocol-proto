@@ -22,13 +22,29 @@ proto/
 │   └── types.proto            # Common types used across layers
 │
 ├── rootlayer/          # RootLayer protocol definitions
-│   ├── intent.proto           # Intent lifecycle (4-state model)
-│   ├── assignment.proto       # Matcher-Agent assignments
-│   ├── direct.proto           # Direct mode protocol
-│   ├── error_reason.proto     # Error reason codes
-│   ├── validation.proto       # Validation definitions
-│   ├── service.proto          # Intent + assignment services
-│   └── openapi.yaml           # OpenAPI specification
+│   ├── pb/                     # Proto source files
+│   │   ├── intent.proto           # Intent lifecycle (4-state model)
+│   │   ├── assignment.proto       # Matcher-Agent assignments
+│   │   ├── direct.proto           # Direct mode protocol
+│   │   ├── error_reason.proto     # Error reason codes
+│   │   ├── validation.proto       # Validation definitions
+│   │   ├── checkpoint.proto       # Checkpoint definitions
+│   │   └── service.proto          # Intent + assignment services
+│   └── proto/                  # Generated Go code
+│       ├── intent.pb.go
+│       ├── assignment.pb.go
+│       ├── direct.pb.go
+│       ├── error_reason.pb.go
+│       ├── validation.pb.go
+│       ├── checkpoint.pb.go
+│       ├── service.pb.go
+│       ├── service_grpc.pb.go
+│       └── service_http.pb.go
+│
+├── third_party/        # Third-party proto dependencies
+│   └── google/                 # Google API protos
+│       ├── api/                   # googleapis annotations
+│       └── protobuf/              # Well-known types
 │
 ├── subnet/             # Subnet protocol definitions
 │   ├── agent.proto            # Agent definitions
@@ -95,11 +111,15 @@ protoc -I ../pin_protocol \
 
 ### For RootLayer
 ```bash
-protoc -I ../pin_protocol \
-  --go_out=paths=source_relative:. \
-  --go-grpc_out=paths=source_relative:. \
-  ../pin_protocol/proto/rootlayer/*.proto
+# From rootlayer/pb/ directory
+cd rootlayer/pb
+protoc -I . -I ../../third_party \
+  --go_out=paths=source_relative:../proto \
+  --go-grpc_out=paths=source_relative:../proto \
+  *.proto
 ```
+
+**Note**: The `third_party/google` directory contains required googleapis dependencies (annotations, http.proto) and google/protobuf well-known types.
 
 ## Migration Notes
 - Subnet may temporarily keep local .proto files for compatibility

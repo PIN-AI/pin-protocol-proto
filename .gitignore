@@ -1,5 +1,4 @@
 # Generated files
-*.pb.go
 *_pb2.py
 *_pb2_grpc.py
 *_grpc.pb.go
