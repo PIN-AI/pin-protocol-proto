@@ -1,9 +1,9 @@
 syntax = "proto3";
 package subnet.v1;
 
-option go_package = "subnet/proto/subnet;pb";
+option go_package = "github.com/PIN-AI/pin-protocol-proto/subnet/proto;subnetv1";
 
-import "proto/subnet/checkpoint.proto";
+import "checkpoint.proto";
 
 message Validator {
   string id = 1;

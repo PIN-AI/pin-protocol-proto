@@ -1,8 +1,8 @@
 syntax = "proto3";
 package subnet.v1;
 
-option go_package = "subnet/proto/subnet;pb";
-import "proto/subnet/report.proto"; // for RootLayerRef reuse
+option go_package = "github.com/PIN-AI/pin-protocol-proto/subnet/proto;subnetv1";
+import "report.proto"; // for RootLayerRef reuse
 
 // Execution report submitted by Agent Service to Validators.
 message ExecutionReport {

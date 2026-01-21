@@ -1,10 +1,10 @@
 syntax = "proto3";
 package subnet.v1;
 
-option go_package = "subnet/proto/subnet;pb";
+option go_package = "github.com/PIN-AI/pin-protocol-proto/subnet/proto;subnetv1";
 
-import "proto/subnet/bid.proto";
-import "proto/subnet/matcher.proto";
+import "bid.proto";
+import "matcher.proto";
 
 // MatcherService defines the bid intake and matching control plane inside subnets.
 service MatcherService {
