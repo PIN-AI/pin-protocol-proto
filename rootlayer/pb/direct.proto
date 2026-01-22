@@ -31,6 +31,7 @@ message DirectIntentPush {
   int64 deadline = 8;
   int64 challenge_end_timestamp = 9;
   bytes params_hash = 10;
+  string target_agent_id = 11;
 }
 
 // HeartbeatRequest - Agent sends heartbeat
@@ -48,6 +49,8 @@ message DirectResultRequest {
   string error_message = 5;
   int64 timestamp = 6;
   bytes agent_signature = 7;  // Agent's signature over the result
+  string target_agent_id = 8;
+  string subnet_id = 9;
 }
 
 // DirectResultResponse - Response to Agent result submission
@@ -81,6 +84,8 @@ message SubmitDirectIntentRequest {
   bytes signature = 10;
   // Target agent address for Direct Mode execution.
   string target_agent = 11;
+  // ERC-8004 agent id (tokenId) for routing.
+  string target_agent_id = 12;
 }
 
 // SubmitDirectIntentResponse - Response to user submission (sync mode only)
@@ -108,6 +113,8 @@ message DirectResult {
   string result_hash = 5;
   string error_message = 6;
   int64 timestamp = 7;
+  string target_agent_id = 8;
+  string subnet_id = 9;
 }
 
 // GetDirectResultRequest - User queries result
@@ -129,4 +136,6 @@ message DirectResultDetail {
   int64 challenge_end_timestamp = 10;
   bool disputed = 11;
   string current_status = 12;
+  string target_agent_id = 13;
+  string subnet_id = 14;
 }

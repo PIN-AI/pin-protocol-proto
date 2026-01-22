@@ -111,6 +111,7 @@ type DirectIntentPush struct {
 	Deadline              int64                  `protobuf:"varint,8,opt,name=deadline,proto3" json:"deadline,omitempty"`
 	ChallengeEndTimestamp int64                  `protobuf:"varint,9,opt,name=challenge_end_timestamp,json=challengeEndTimestamp,proto3" json:"challenge_end_timestamp,omitempty"`
 	ParamsHash            []byte                 `protobuf:"bytes,10,opt,name=params_hash,json=paramsHash,proto3" json:"params_hash,omitempty"`
+	TargetAgentId         string                 `protobuf:"bytes,11,opt,name=target_agent_id,json=targetAgentId,proto3" json:"target_agent_id,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -215,6 +216,13 @@ func (x *DirectIntentPush) GetParamsHash() []byte {
 	return nil
 }
 
+func (x *DirectIntentPush) GetTargetAgentId() string {
+	if x != nil {
+		return x.TargetAgentId
+	}
+	return ""
+}
+
 // HeartbeatRequest - Agent sends heartbeat
 type HeartbeatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -278,6 +286,8 @@ type DirectResultRequest struct {
 	ErrorMessage   string                 `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	Timestamp      int64                  `protobuf:"varint,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	AgentSignature []byte                 `protobuf:"bytes,7,opt,name=agent_signature,json=agentSignature,proto3" json:"agent_signature,omitempty"` // Agent's signature over the result
+	TargetAgentId  string                 `protobuf:"bytes,8,opt,name=target_agent_id,json=targetAgentId,proto3" json:"target_agent_id,omitempty"`
+	SubnetId       string                 `protobuf:"bytes,9,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -359,6 +369,20 @@ func (x *DirectResultRequest) GetAgentSignature() []byte {
 		return x.AgentSignature
 	}
 	return nil
+}
+
+func (x *DirectResultRequest) GetTargetAgentId() string {
+	if x != nil {
+		return x.TargetAgentId
+	}
+	return ""
+}
+
+func (x *DirectResultRequest) GetSubnetId() string {
+	if x != nil {
+		return x.SubnetId
+	}
+	return ""
 }
 
 // DirectResultResponse - Response to Agent result submission
@@ -446,7 +470,9 @@ type SubmitDirectIntentRequest struct {
 	// User signature covering canonical intent content (EIP-191).
 	Signature []byte `protobuf:"bytes,10,opt,name=signature,proto3" json:"signature,omitempty"`
 	// Target agent address for Direct Mode execution.
-	TargetAgent   string `protobuf:"bytes,11,opt,name=target_agent,json=targetAgent,proto3" json:"target_agent,omitempty"`
+	TargetAgent string `protobuf:"bytes,11,opt,name=target_agent,json=targetAgent,proto3" json:"target_agent,omitempty"`
+	// ERC-8004 agent id (tokenId) for routing.
+	TargetAgentId string `protobuf:"bytes,12,opt,name=target_agent_id,json=targetAgentId,proto3" json:"target_agent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -558,6 +584,13 @@ func (x *SubmitDirectIntentRequest) GetTargetAgent() string {
 	return ""
 }
 
+func (x *SubmitDirectIntentRequest) GetTargetAgentId() string {
+	if x != nil {
+		return x.TargetAgentId
+	}
+	return ""
+}
+
 // SubmitDirectIntentResponse - Response to user submission (sync mode only)
 type SubmitDirectIntentResponse struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
@@ -656,6 +689,8 @@ type DirectResult struct {
 	ResultHash    string                 `protobuf:"bytes,5,opt,name=result_hash,json=resultHash,proto3" json:"result_hash,omitempty"`
 	ErrorMessage  string                 `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	TargetAgentId string                 `protobuf:"bytes,8,opt,name=target_agent_id,json=targetAgentId,proto3" json:"target_agent_id,omitempty"`
+	SubnetId      string                 `protobuf:"bytes,9,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -739,6 +774,20 @@ func (x *DirectResult) GetTimestamp() int64 {
 	return 0
 }
 
+func (x *DirectResult) GetTargetAgentId() string {
+	if x != nil {
+		return x.TargetAgentId
+	}
+	return ""
+}
+
+func (x *DirectResult) GetSubnetId() string {
+	if x != nil {
+		return x.SubnetId
+	}
+	return ""
+}
+
 // GetDirectResultRequest - User queries result
 type GetDirectResultRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -799,6 +848,8 @@ type DirectResultDetail struct {
 	ChallengeEndTimestamp int64                  `protobuf:"varint,10,opt,name=challenge_end_timestamp,json=challengeEndTimestamp,proto3" json:"challenge_end_timestamp,omitempty"`
 	Disputed              bool                   `protobuf:"varint,11,opt,name=disputed,proto3" json:"disputed,omitempty"`
 	CurrentStatus         string                 `protobuf:"bytes,12,opt,name=current_status,json=currentStatus,proto3" json:"current_status,omitempty"`
+	TargetAgentId         string                 `protobuf:"bytes,13,opt,name=target_agent_id,json=targetAgentId,proto3" json:"target_agent_id,omitempty"`
+	SubnetId              string                 `protobuf:"bytes,14,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -917,6 +968,20 @@ func (x *DirectResultDetail) GetCurrentStatus() string {
 	return ""
 }
 
+func (x *DirectResultDetail) GetTargetAgentId() string {
+	if x != nil {
+		return x.TargetAgentId
+	}
+	return ""
+}
+
+func (x *DirectResultDetail) GetSubnetId() string {
+	if x != nil {
+		return x.SubnetId
+	}
+	return ""
+}
+
 var File_direct_proto protoreflect.FileDescriptor
 
 const file_direct_proto_rawDesc = "" +
@@ -927,7 +992,7 @@ const file_direct_proto_rawDesc = "" +
 	"\tsignature\x18\x02 \x01(\fR\tsignature\x12%\n" +
 	"\x0eclient_version\x18\x03 \x01(\tR\rclientVersion\x12\x1c\n" +
 	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
-	"\frandom_nonce\x18\x05 \x01(\fR\vrandomNonce\"\xf1\x02\n" +
+	"\frandom_nonce\x18\x05 \x01(\fR\vrandomNonce\"\x99\x03\n" +
 	"\x10DirectIntentPush\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12\x1b\n" +
 	"\tsubnet_id\x18\x02 \x01(\tR\bsubnetId\x12\x1c\n" +
@@ -941,10 +1006,11 @@ const file_direct_proto_rawDesc = "" +
 	"\x17challenge_end_timestamp\x18\t \x01(\x03R\x15challengeEndTimestamp\x12\x1f\n" +
 	"\vparams_hash\x18\n" +
 	" \x01(\fR\n" +
-	"paramsHash\"U\n" +
+	"paramsHash\x12&\n" +
+	"\x0ftarget_agent_id\x18\v \x01(\tR\rtargetAgentId\"U\n" +
 	"\x10HeartbeatRequest\x12#\n" +
 	"\ragent_address\x18\x01 \x01(\tR\fagentAddress\x12\x1c\n" +
-	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\"\xfe\x01\n" +
+	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\"\xc3\x02\n" +
 	"\x13DirectResultRequest\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12#\n" +
 	"\ragent_address\x18\x02 \x01(\tR\fagentAddress\x12\x18\n" +
@@ -953,12 +1019,14 @@ const file_direct_proto_rawDesc = "" +
 	"resultData\x12#\n" +
 	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\x12\x1c\n" +
 	"\ttimestamp\x18\x06 \x01(\x03R\ttimestamp\x12'\n" +
-	"\x0fagent_signature\x18\a \x01(\fR\x0eagentSignature\"Y\n" +
+	"\x0fagent_signature\x18\a \x01(\fR\x0eagentSignature\x12&\n" +
+	"\x0ftarget_agent_id\x18\b \x01(\tR\rtargetAgentId\x12\x1b\n" +
+	"\tsubnet_id\x18\t \x01(\tR\bsubnetId\"Y\n" +
 	"\x14DirectResultResponse\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x10\n" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\x12\x1f\n" +
 	"\vresult_hash\x18\x03 \x01(\tR\n" +
-	"resultHash\"\x85\x03\n" +
+	"resultHash\"\xad\x03\n" +
 	"\x19SubmitDirectIntentRequest\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12\x1b\n" +
 	"\tsubnet_id\x18\x02 \x01(\tR\bsubnetId\x12\x1c\n" +
@@ -972,7 +1040,8 @@ const file_direct_proto_rawDesc = "" +
 	"\bdeadline\x18\t \x01(\x03R\bdeadline\x12\x1c\n" +
 	"\tsignature\x18\n" +
 	" \x01(\fR\tsignature\x12!\n" +
-	"\ftarget_agent\x18\v \x01(\tR\vtargetAgent\"\xc8\x01\n" +
+	"\ftarget_agent\x18\v \x01(\tR\vtargetAgent\x12&\n" +
+	"\x0ftarget_agent_id\x18\f \x01(\tR\rtargetAgentId\"\xc8\x01\n" +
 	"\x1aSubmitDirectIntentResponse\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x10\n" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\x12\x1b\n" +
@@ -980,7 +1049,7 @@ const file_direct_proto_rawDesc = "" +
 	"\x06result\x18\x04 \x01(\v2\x1a.rootlayer.v1.DirectResultR\x06result\x12\x1f\n" +
 	"\vparams_hash\x18\x05 \x01(\fR\n" +
 	"paramsHash\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\xef\x01\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"\xb4\x02\n" +
 	"\fDirectResult\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12#\n" +
 	"\ragent_address\x18\x02 \x01(\tR\fagentAddress\x12\x18\n" +
@@ -990,9 +1059,11 @@ const file_direct_proto_rawDesc = "" +
 	"\vresult_hash\x18\x05 \x01(\tR\n" +
 	"resultHash\x12#\n" +
 	"\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x12\x1c\n" +
-	"\ttimestamp\x18\a \x01(\x03R\ttimestamp\"5\n" +
+	"\ttimestamp\x18\a \x01(\x03R\ttimestamp\x12&\n" +
+	"\x0ftarget_agent_id\x18\b \x01(\tR\rtargetAgentId\x12\x1b\n" +
+	"\tsubnet_id\x18\t \x01(\tR\bsubnetId\"5\n" +
 	"\x16GetDirectResultRequest\x12\x1b\n" +
-	"\tintent_id\x18\x01 \x01(\tR\bintentId\"\xba\x03\n" +
+	"\tintent_id\x18\x01 \x01(\tR\bintentId\"\xff\x03\n" +
 	"\x12DirectResultDetail\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12#\n" +
 	"\ragent_address\x18\x02 \x01(\tR\fagentAddress\x12\x18\n" +
@@ -1009,7 +1080,9 @@ const file_direct_proto_rawDesc = "" +
 	"\x17challenge_end_timestamp\x18\n" +
 	" \x01(\x03R\x15challengeEndTimestamp\x12\x1a\n" +
 	"\bdisputed\x18\v \x01(\bR\bdisputed\x12%\n" +
-	"\x0ecurrent_status\x18\f \x01(\tR\rcurrentStatusBBZ@github.com/PIN-AI/pin-protocol-proto/rootlayer/proto;rootlayerv1b\x06proto3"
+	"\x0ecurrent_status\x18\f \x01(\tR\rcurrentStatus\x12&\n" +
+	"\x0ftarget_agent_id\x18\r \x01(\tR\rtargetAgentId\x12\x1b\n" +
+	"\tsubnet_id\x18\x0e \x01(\tR\bsubnetIdBBZ@github.com/PIN-AI/pin-protocol-proto/rootlayer/proto;rootlayerv1b\x06proto3"
 
 var (
 	file_direct_proto_rawDescOnce sync.Once
