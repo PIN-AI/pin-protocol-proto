@@ -29,6 +29,8 @@ type AgentConnectRequest struct {
 	ClientVersion string                 `protobuf:"bytes,3,opt,name=client_version,json=clientVersion,proto3" json:"client_version,omitempty"` // Agent client version
 	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`                             // Connection timestamp (unix seconds, for signature freshness)
 	RandomNonce   []byte                 `protobuf:"bytes,5,opt,name=random_nonce,json=randomNonce,proto3" json:"random_nonce,omitempty"`       // 32-byte random nonce (for signature uniqueness)
+	// ERC-8004 agent id (tokenId) this connection represents.
+	AgentId       string `protobuf:"bytes,6,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -96,6 +98,13 @@ func (x *AgentConnectRequest) GetRandomNonce() []byte {
 		return x.RandomNonce
 	}
 	return nil
+}
+
+func (x *AgentConnectRequest) GetAgentId() string {
+	if x != nil {
+		return x.AgentId
+	}
+	return ""
 }
 
 // DirectIntentPush - Relayer pushes Intent to Agent via stream
@@ -225,9 +234,11 @@ func (x *DirectIntentPush) GetTargetAgentId() string {
 
 // HeartbeatRequest - Agent sends heartbeat
 type HeartbeatRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AgentAddress  string                 `protobuf:"bytes,1,opt,name=agent_address,json=agentAddress,proto3" json:"agent_address,omitempty"`
-	Timestamp     int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	AgentAddress string                 `protobuf:"bytes,1,opt,name=agent_address,json=agentAddress,proto3" json:"agent_address,omitempty"`
+	Timestamp    int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// ERC-8004 agent id (tokenId) this heartbeat belongs to.
+	AgentId       string `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -274,6 +285,13 @@ func (x *HeartbeatRequest) GetTimestamp() int64 {
 		return x.Timestamp
 	}
 	return 0
+}
+
+func (x *HeartbeatRequest) GetAgentId() string {
+	if x != nil {
+		return x.AgentId
+	}
+	return ""
 }
 
 // DirectResultRequest - Agent submits execution result
@@ -986,13 +1004,14 @@ var File_direct_proto protoreflect.FileDescriptor
 
 const file_direct_proto_rawDesc = "" +
 	"\n" +
-	"\fdirect.proto\x12\frootlayer.v1\x1a\fintent.proto\"\xc0\x01\n" +
+	"\fdirect.proto\x12\frootlayer.v1\x1a\fintent.proto\"\xdb\x01\n" +
 	"\x13AgentConnectRequest\x12#\n" +
 	"\ragent_address\x18\x01 \x01(\tR\fagentAddress\x12\x1c\n" +
 	"\tsignature\x18\x02 \x01(\fR\tsignature\x12%\n" +
 	"\x0eclient_version\x18\x03 \x01(\tR\rclientVersion\x12\x1c\n" +
 	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
-	"\frandom_nonce\x18\x05 \x01(\fR\vrandomNonce\"\x99\x03\n" +
+	"\frandom_nonce\x18\x05 \x01(\fR\vrandomNonce\x12\x19\n" +
+	"\bagent_id\x18\x06 \x01(\tR\aagentId\"\x99\x03\n" +
 	"\x10DirectIntentPush\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12\x1b\n" +
 	"\tsubnet_id\x18\x02 \x01(\tR\bsubnetId\x12\x1c\n" +
@@ -1007,10 +1026,11 @@ const file_direct_proto_rawDesc = "" +
 	"\vparams_hash\x18\n" +
 	" \x01(\fR\n" +
 	"paramsHash\x12&\n" +
-	"\x0ftarget_agent_id\x18\v \x01(\tR\rtargetAgentId\"U\n" +
+	"\x0ftarget_agent_id\x18\v \x01(\tR\rtargetAgentId\"p\n" +
 	"\x10HeartbeatRequest\x12#\n" +
 	"\ragent_address\x18\x01 \x01(\tR\fagentAddress\x12\x1c\n" +
-	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\"\xc3\x02\n" +
+	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\x12\x19\n" +
+	"\bagent_id\x18\x03 \x01(\tR\aagentId\"\xc3\x02\n" +
 	"\x13DirectResultRequest\x12\x1b\n" +
 	"\tintent_id\x18\x01 \x01(\tR\bintentId\x12#\n" +
 	"\ragent_address\x18\x02 \x01(\tR\fagentAddress\x12\x18\n" +

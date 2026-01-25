@@ -17,6 +17,8 @@ message AgentConnectRequest {
   string client_version = 3;  // Agent client version
   int64 timestamp = 4;        // Connection timestamp (unix seconds, for signature freshness)
   bytes random_nonce = 5;     // 32-byte random nonce (for signature uniqueness)
+  // ERC-8004 agent id (tokenId) this connection represents.
+  string agent_id = 6;
 }
 
 // DirectIntentPush - Relayer pushes Intent to Agent via stream
@@ -38,6 +40,8 @@ message DirectIntentPush {
 message HeartbeatRequest {
   string agent_address = 1;
   int64 timestamp = 2;
+  // ERC-8004 agent id (tokenId) this heartbeat belongs to.
+  string agent_id = 3;
 }
 
 // DirectResultRequest - Agent submits execution result
